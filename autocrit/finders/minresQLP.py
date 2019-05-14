@@ -1,3 +1,4 @@
+# flake8: noqa
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jan 14 23:43:12 2018
@@ -51,7 +52,7 @@ minresQLP: Aim to obtain the min-length solution of symmetric
    X = minresQLP(A,B,RTOL,MAXIT,M)
    uses a matrix M as preconditioner.  M must be positive definite
    and symmetric or Hermitian.  It may be a function handle MFUN
-   such that Y=MFUN(X) returns Y=M\X.
+   such that Y=MFUN(X) returns Y=M divide X.
    If M=[], a preconditioner is not applied.
 
    X = minresQLP(A,B,RTOL,MAXIT,M,SHIFT)
@@ -131,7 +132,6 @@ COPYRIGHT NOTICE:
    If you seek permission to copy and distribute translations of this 
    software into another language, please e-mail a specific request to
    saunders@stanford.edu and scchoi@stanford.edu.
- 
 """
 
 import numpy as np
