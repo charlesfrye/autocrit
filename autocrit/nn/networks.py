@@ -137,7 +137,7 @@ class Network(object):
                 "batch_size": self.batch_size}
 
     def initialize(self):
-        return np.random.standard_normal(size=[self.N_params, 1])
+        return 1 / np.sqrt(self.N_params)  * np.random.standard_normal(size=[self.N_params, 1])
 
 
 class FullyConnected(Network):
