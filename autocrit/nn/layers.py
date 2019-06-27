@@ -10,6 +10,8 @@ convolve = autograd.scipy.signal.convolve
 
 _NONLINEARITIES = {"relu": math.relu,
                    "sigmoid": math.sigmoid,
+                   "softplus": math.softplus,
+                   "swish": math.swish,
                    "none": lambda x: x}
 
 

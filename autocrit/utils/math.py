@@ -12,8 +12,16 @@ def relu(x):
     return np.where(x > 0., x, 0.)
 
 
+def softplus(x, lam=5.):
+    return 1 / lam * np.log(1 + np.exp(lam * x))
+
+
 def sigmoid(x):
     return np.where(x >= 0, _positive_sigm(x), _negative_sigm(x))
+
+
+def swish(x):
+    return np.multiply(x, sigmoid(x))
 
 
 def _negative_sigm(x):
