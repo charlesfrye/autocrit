@@ -1,5 +1,5 @@
 # flake8: noqa E221, E251
-"""Adds torch acceleration to autograd's convolve function.
+"""Adds optional torch acceleration to autograd's convolve function.
 """
 import autograd.scipy.signal as _autograd_signal
 from functools import partial
@@ -15,9 +15,9 @@ except ImportError:
     torch_accelerated = False
 
 
-def convolve(A, B, axes=None, dot_axes=[(), ()], mode='full'):
+def convolve(A, B, axes=None, dot_axes=[(), ()], mode='full', accelerated=torch_accelerated):
     args_are_implemented = check_implemented(axes, dot_axes, mode)
-    if torch_accelerated and args_are_implemented:
+    if accelerated and args_are_implemented:
         return _torch_convolve(A, B, axes=axes, dot_axes=dot_axes, mode=mode)
     else:
         return _autograd_signal.convolve(A, B, axes=axes, dot_axes=dot_axes, mode=mode)
@@ -27,7 +27,12 @@ def convolve(A, B, axes=None, dot_axes=[(), ()], mode='full'):
 def _torch_convolve(A, B, axes=None, dot_axes=[(), ()], mode='full'):
     B = np.ascontiguousarray(np.transpose(B[:, :, ::-1, ::-1], (1, 0, 2, 3)))
     At, Bt = torch.tensor(A), torch.tensor(B)
-    yt = torch_F.conv2d(At, Bt)
+    if tuple(dot_axes) == ([0], [0]):
+        At = torch.transpose(At, 0 ,1)
+        yt = torch_F.conv2d(Bt, At)
+        yt = torch.flip(torch.transpose(yt, 0, 1), (-2, -1))
+    else:
+        yt = torch_F.conv2d(At, Bt)
     return np.asarray(yt)
 
 
@@ -35,10 +40,12 @@ def check_implemented(axes, dot_axes, mode):
     """Check whether a fast convolution with these argument values has been implemented."""
     if tuple(axes) != ([2, 3], [2, 3]):
         return False
-    if tuple(dot_axes) != ([1], [0]):
+    if tuple(dot_axes) not in [([1], [0]), ([0], [0])]:
         return False
     if mode != "valid":
         return False
+
+    return True
 
 
 def _torch_grad_convolve(argnum, ans, A, B, axes=None, dot_axes=[(), ()], mode='full'):

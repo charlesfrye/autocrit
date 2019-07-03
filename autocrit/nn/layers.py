@@ -1,12 +1,9 @@
 # modified from code in autograd/examples/convnet.py
 
-import autograd
 import autograd.numpy as np
-import autograd.scipy.signal
 
+from autocrit.nn.conv import convolve
 from autocrit.utils import math
-
-convolve = autograd.scipy.signal.convolve
 
 _NONLINEARITIES = {"relu": math.relu,
                    "sigmoid": math.sigmoid,
