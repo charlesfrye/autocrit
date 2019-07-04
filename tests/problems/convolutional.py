@@ -1,6 +1,6 @@
 import autograd.numpy as np
 
-from ..utils import circulant
+from . import conv_utils
 
 
 class Classification(object):
@@ -45,13 +45,13 @@ class Classification(object):
 
 def generate_convolutional_mog_data(n, im_side=17, autocorr_scale=5.):
 
-    circ_cov_mat = circulant.generate_iostropic_circulant_cov_2d(
+    circ_cov_mat = conv_utils.generate_iostropic_circulant_cov_2d(
         im_side, autocorr_scale=autocorr_scale)
-    circ_class_samples = circulant.rgb_gauss_random_samples(
+    circ_class_samples = conv_utils.rgb_gauss_random_samples(
         n, cov_or_covs=circ_cov_mat)
 
     white_noise_cov_mat = np.eye(im_side ** 2)
-    noise_class_samples = circulant.rgb_gauss_random_samples(
+    noise_class_samples = conv_utils.rgb_gauss_random_samples(
         n, cov_or_covs=white_noise_cov_mat)
 
     # combine batch major samples from each class
@@ -59,7 +59,7 @@ def generate_convolutional_mog_data(n, im_side=17, autocorr_scale=5.):
 
     # covert to images, then return to batch minor
     inputs = np.asarray(
-        [circulant.to_im_rgb(inpt, im_side) for inpt in inputs]).T
+        [conv_utils.to_im_rgb(inpt, im_side) for inpt in inputs]).T
 
     # generate one_hot and label vectors
     one_hots = np.hstack([np.tile(np.atleast_2d([1, 0]).T, [1, n]),
