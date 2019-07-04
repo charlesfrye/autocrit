@@ -72,7 +72,7 @@ def _torch_grad_convolve(argnum, ans, A, B, axes=None, dot_axes=[(), ()], mode='
             new_mode = 'valid'
 
     def vjp(g):
-        result = convolve(g, Y[_autograd_signal.flipped_idxs(Y.ndim, axes[_Y_]['conv'])],
+        result = convolve(g, Y[tuple(_autograd_signal.flipped_idxs(Y.ndim, axes[_Y_]['conv']))],
                           axes     = [axes['out']['conv'],   axes[_Y_]['conv']],
                           dot_axes = [axes['out'][ignore_Y], axes[_Y_]['ignore']],
                           mode     = new_mode)
