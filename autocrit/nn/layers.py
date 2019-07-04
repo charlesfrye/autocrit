@@ -2,7 +2,7 @@
 
 import autograd.numpy as np
 
-from autocrit.nn.conv import convolve
+from autocrit.nn.conv import convolve, torch_accelerated
 from autocrit.utils import math
 
 _NONLINEARITIES = {"relu": math.relu,
@@ -145,15 +145,17 @@ class ConvLayer(Layer):
     """
     str = "conv"
 
-    def __init__(self, kernel_shape, out_channels):
+    def __init__(self, kernel_shape, out_channels, accelerated=torch_accelerated):
         """
         Parameters
         ----------
         kernel_shape: tuple of ints, shape of convolutional kernel
         out_channels: int, number of output channels aka convolutional kernels
+        accelerated: Boolean, use pytorch acceleration, if available. See conv.py
         """
         self.kernel_shape = kernel_shape
         self.out_channels = out_channels
+        self.accelerated = accelerated
 
     def forward_pass(self, inputs, theta):
         weights = self.parser.get(theta, 'weights')
@@ -161,7 +163,7 @@ class ConvLayer(Layer):
         inputs = self.to_batch_major(inputs)
         conv = convolve(inputs, weights,
                         axes=([2, 3], [2, 3]), dot_axes=([1], [0]),
-                        mode='valid')
+                        mode='valid', accelerated=self.accelerated)
         activations = conv + biases
         activations = self.to_batch_minor(activations)
         return activations
