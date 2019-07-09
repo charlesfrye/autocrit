@@ -20,11 +20,11 @@ _COSTS = {"mean_squared_error": math.mean_squared_error,
 
 
 def l2_regularizer(theta):
-    return np.sum(np.square(theta))
+    return np.mean(np.square(theta))
 
 
 def l1_regularizer(theta):
-    return np.sum(np.abs(theta))
+    return np.mean(np.abs(theta))
 
 
 _REGULARIZERS = {"l2": l2_regularizer,
