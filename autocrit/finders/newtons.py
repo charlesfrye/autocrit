@@ -1,6 +1,6 @@
 """Provides Newton-style methods for finding critical points.
 """
-import warnings
+# import warnings
 
 import autograd
 import autograd.numpy as np
@@ -110,8 +110,8 @@ class NewtonBTLS(NewtonMethod):
 
     def check_convergence(self, theta, update_direction, alpha, rho):
         proposed_update = theta + alpha * update_direction
-        updated_squared_gradient_norm = self.squared_grad_norm(self.grad_f(proposed_update))
-        current_squared_gradient_norm = self.squared_grad_norm(self.grad_f(theta))
+        updated_squared_gradient_norm = self.squared_grad_norm(proposed_update)
+        current_squared_gradient_norm = self.squared_grad_norm(theta)
         sufficient_decrease = 2 * rho * alpha * np.dot(self.hvp(theta, update_direction).T,
                                                        self.grad_f(theta))
 
