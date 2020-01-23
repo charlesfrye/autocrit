@@ -6,6 +6,8 @@ DEFAULT_ALPHA = 0.1
 DEFAULT_BETA = 0.5
 # RHO: scaling factor for Armijo/sufficient decrease criterion
 DEFAULT_RHO = 1e-4
+# RHO_PURE: same as RHO,  but for the Pure Newton check
+DEFAULT_RHO_PURE = 0.5
 # GAMMA: scaling factor for Wolfe/sufficient curvature decrease criterion
 DEFAULT_GAMMA = 0.9
 # GAMMAS: "nudge" to add to diagonal in NewtonTR

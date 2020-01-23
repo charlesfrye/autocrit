@@ -10,6 +10,7 @@ from .minresQLP import MinresQLP as mrqlp
 from .base import Finder
 from ..defaults import DEFAULT_STEP_SIZE, DEFAULT_RTOL, DEFAULT_MAXIT
 from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO
+from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO_PURE
 
 
 class NewtonMethod(Finder):
@@ -86,11 +87,15 @@ class NewtonBTLS(NewtonMethod):
     Convergence is checked using the Roosta criterion.
     """
 
-    def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO, log_kwargs=None):
+    def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO,
+                 check_pure=False, rho_pure=DEFAULT_RHO_PURE, log_kwargs=None):
         NewtonMethod.__init__(self, f, log_kwargs=log_kwargs)
         self.alpha = alpha
         self.beta = beta
         self.rho = rho
+
+        self.check_pure = check_pure
+        self.rho_pure = rho_pure
 
         self.parameters.update({"alpha": alpha,
                                 "beta": beta,
@@ -98,14 +103,23 @@ class NewtonBTLS(NewtonMethod):
         self.min_step_size = self.compute_min_step_size(alpha, beta)
 
     def select_update(self, theta, update_direction):
-        converged = self.check_convergence(theta, update_direction, self.alpha, self.rho)
+        if self.check_pure and self.alpha != 1:
+            converged = self.check_convergence(theta, update_direction, 1., self.rho_pure)
+            if converged:
+                self.alpha = 1.
+        else:
+            converged = False
+
         while not converged:
-            self.alpha *= self.beta
-            if self.alpha <= self.min_step_size:
-                return np.zeros_like(theta)
             converged = self.check_convergence(theta, update_direction, self.alpha, self.rho)
+
+            if not converged:
+                self.alpha *= self.beta
+                if self.alpha <= self.min_step_size:
+                    return np.zeros_like(theta)
+
         update = theta + self.alpha * update_direction
-        self.alpha /= self.beta
+        self.alpha = min(1., self.alpha / self.beta)
         return update
 
     def check_convergence(self, theta, update_direction, alpha, rho):
@@ -131,9 +145,11 @@ class NewtonMR(NewtonBTLS):
     """
 
     def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO,
+                 check_pure=False, rho_pure=DEFAULT_RHO_PURE,
                  rtol=DEFAULT_RTOL, maxit=DEFAULT_MAXIT,
                  log_kwargs=None):
-        NewtonBTLS.__init__(self, f, alpha, beta, rho, log_kwargs=log_kwargs)
+        NewtonBTLS.__init__(self, f, alpha, beta, rho, check_pure, rho_pure,
+                            log_kwargs=log_kwargs)
         self.rtol = rtol
         self.maxit = maxit
 
@@ -153,9 +169,11 @@ class FastNewtonMR(NewtonMR):
     """
 
     def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO,
+                 check_pure=False, rho_pure=DEFAULT_RHO_PURE,
                  rtol=DEFAULT_RTOL, maxit=DEFAULT_MAXIT,
                  log_kwargs=None):
-        NewtonMR.__init__(self, f, alpha, beta, rho, rtol=rtol, maxit=maxit, log_kwargs=log_kwargs)
+        NewtonMR.__init__(self, f, alpha, beta, rho, check_pure, rho_pure,
+                          rtol=rtol, maxit=maxit, log_kwargs=log_kwargs)
         self.hvp = autograd.hessian_vector_product(self.f)
 
 
