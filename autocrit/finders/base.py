@@ -33,7 +33,8 @@ class Finder(object):
         for logger in self.loggers:
             logger.write_log(step_info, self.log)
 
-    def setup_logs(self, track_theta=False, track_f=True, track_grad_f=False, track_g=False):
+    def setup_logs(self, track_theta=False, track_f=True, track_grad_f=False, track_g=False,
+                   track_update=False):
         if track_theta:
             self.loggers.append(
                 Logger("theta",
@@ -53,6 +54,11 @@ class Finder(object):
             self.loggers.append(
                 Logger("g_theta",
                        lambda step_info: 0.5 * np.sum(np.square(self.grad_f(step_info["theta"])))))
+
+        if track_update:
+            self.loggers.append(
+                Logger("update_direction",
+                       lambda step_info: step_info["update_direction"]))
 
 
 class Logger(object):

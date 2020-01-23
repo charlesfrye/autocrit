@@ -7,7 +7,7 @@ import autograd.numpy as np
 
 from .minresQLP import MinresQLP as mrqlp
 
-from .base import Finder
+from .base import Finder, Logger
 from ..defaults import DEFAULT_STEP_SIZE, DEFAULT_RTOL, DEFAULT_MAXIT
 from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO
 from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO_PURE
@@ -18,6 +18,10 @@ class NewtonMethod(Finder):
 
     All Newton methods are run the same way: select an update direction or directions,
     and then the current value of theta and the update direction(s) are used to select an update.
+
+    Those two steps are implemented here as the methods get_update_direction,
+    which inverts the Hessian and multiplies it with the negative gradient,
+    and select_update, which scales the result by the step_size.
 
     Additional Newton methods are defined by over-riding those two methods.
     """
@@ -96,10 +100,20 @@ class NewtonBTLS(NewtonMethod):
 
         self.check_pure = check_pure
         self.rho_pure = rho_pure
+        self.pure_accepted = False
 
-        self.parameters.update({"alpha": alpha,
-                                "beta": beta,
-                                "rho": rho})
+        self.parameters.update({"alpha": self.alpha,
+                                "pure_accepted": self.pure_accepted})
+
+        self.loggers.append(
+                Logger("alpha",
+                       lambda step_info: step_info["parameters"]["alpha"]))
+
+        if self.check_pure:
+            self.loggers.append(
+                Logger("pure_accepted",
+                       lambda step_info: step_info["parameters"]["pure_accepted"]))
+
         self.min_step_size = self.compute_min_step_size(alpha, beta)
 
     def select_update(self, theta, update_direction):
@@ -107,8 +121,10 @@ class NewtonBTLS(NewtonMethod):
             converged = self.check_convergence(theta, update_direction, 1., self.rho_pure)
             if converged:
                 self.alpha = 1.
+                self.pure_accepted = True
         else:
             converged = False
+            self.pure_accepted = False
 
         while not converged:
             converged = self.check_convergence(theta, update_direction, self.alpha, self.rho)
@@ -119,6 +135,11 @@ class NewtonBTLS(NewtonMethod):
                     return np.zeros_like(theta)
 
         update = theta + self.alpha * update_direction
+
+        self.parameters.update(
+                {"alpha": self.alpha,
+                 "pure_accepted": self.pure_accepted})
+
         self.alpha = min(1., self.alpha / self.beta)
         return update
 
