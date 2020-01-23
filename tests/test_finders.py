@@ -30,7 +30,7 @@ def test_FastNewtonMR():
     finder_str = "FastNewtonMR"
 
     problem_str = "least squares"
-    finder_kwargs = {"alpha": 0.5, "beta": 0.99}
+    finder_kwargs = {"alpha": 0.5, "beta": 0.99, "check_pure": True}
     num_iters = 500
 
     random_least_squares_problem, random_init = \
@@ -91,7 +91,8 @@ def test_deep_classification():
     finder = autocrit.FastNewtonMR
     finder_str = "FastNewtonMR"
 
-    finder_kwargs = {"alpha": 0.1, "beta": 0.9, "rho": 1e-6}
+    finder_kwargs = {"alpha": 1., "beta": 0.5, "rho": 1e-6,
+                     "check_pure": True}
     num_iters = 250
 
     random_classification_problem, network, random_init = \
