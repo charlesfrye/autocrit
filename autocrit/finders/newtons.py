@@ -9,8 +9,7 @@ from .minresQLP import MinresQLP as mrqlp
 
 from .base import Finder, Logger
 from ..defaults import DEFAULT_STEP_SIZE, DEFAULT_RTOL, DEFAULT_MAXIT
-from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO
-from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO_PURE
+from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO, DEFAULT_RHO_PURE
 
 
 class NewtonMethod(Finder):
@@ -106,8 +105,8 @@ class NewtonBTLS(NewtonMethod):
                                 "pure_accepted": self.pure_accepted})
 
         self.loggers.append(
-                Logger("alpha",
-                       lambda step_info: step_info["parameters"]["alpha"]))
+            Logger("alpha",
+                   lambda step_info: step_info["parameters"]["alpha"]))
 
         if self.check_pure:
             self.loggers.append(
@@ -137,8 +136,8 @@ class NewtonBTLS(NewtonMethod):
         update = theta + self.alpha * update_direction
 
         self.parameters.update(
-                {"alpha": self.alpha,
-                 "pure_accepted": self.pure_accepted})
+            {"alpha": self.alpha,
+             "pure_accepted": self.pure_accepted})
 
         self.alpha = min(1., self.alpha / self.beta)
         return update
