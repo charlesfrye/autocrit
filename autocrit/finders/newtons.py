@@ -11,6 +11,10 @@ from .base import Finder, Logger
 from ..defaults import DEFAULT_STEP_SIZE, DEFAULT_RTOL, DEFAULT_MAXIT
 from ..defaults import DEFAULT_ALPHA, DEFAULT_BETA, DEFAULT_GAMMAS, DEFAULT_RHO, DEFAULT_RHO_PURE
 
+DEFAULT_ACONDLIM = 1e7
+DEFAULT_MAXXNORM = 1e4
+DEFAULT_TRANCOND = 1e4
+
 
 class NewtonMethod(Finder):
     """Base version of Newton method for finding critical points.
@@ -167,19 +171,41 @@ class NewtonMR(NewtonBTLS):
     def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO,
                  check_pure=False, rho_pure=DEFAULT_RHO_PURE,
                  rtol=DEFAULT_RTOL, maxit=DEFAULT_MAXIT,
-                 log_kwargs=None):
+                 acondlim=DEFAULT_ACONDLIM, trancond=DEFAULT_TRANCOND,
+                 maxxnorm=DEFAULT_MAXXNORM,
+                 log_mrqlp=False, log_kwargs=None):
         NewtonBTLS.__init__(self, f, alpha, beta, rho, check_pure, rho_pure,
                             log_kwargs=log_kwargs)
         self.rtol = rtol
         self.maxit = maxit
+        self.acondlim = acondlim
+        self.trancond = trancond
+        self.maxxnorm = maxxnorm
 
         self.parameters.update({"rtol": rtol,
-                                "maxit": maxit})
+                                "maxit": maxit,
+                                "acondlim": acondlim,
+                                "trancond": trancond,
+                                "maxxnorm": maxxnorm})
+
+        self.log_mrqlp = log_mrqlp
+
+        if self.log_mrqlp:
+            self.loggers.append(
+                Logger("mrqlp_outputs",
+                       lambda step_info: step_info["parameters"]["mrqlp_outputs"]))
+            self.parameters.update({"mrqlp_outputs": None})
 
     def get_update_direction(self, theta):
         current_hvp = lambda v: self.hvp(theta, v)
-        mr_update_direction = mrqlp(current_hvp, -1 * self.grad_f(theta),
-                                    rtol=self.rtol, maxit=self.maxit)[0]
+        mrqlp_outputs = mrqlp(
+            current_hvp, -1 * self.grad_f(theta),
+            rtol=self.rtol, maxit=self.maxit,
+            acondlim=self.acondlim, trancond=self.trancond, maxxnorm=self.maxxnorm)
+
+        self.parameters.update({"mrqlp_outputs": mrqlp_outputs[1:]})
+        mr_update_direction = mrqlp_outputs[0]
+
         return mr_update_direction
 
 
@@ -191,9 +217,12 @@ class FastNewtonMR(NewtonMR):
     def __init__(self, f, alpha=DEFAULT_ALPHA, beta=DEFAULT_BETA, rho=DEFAULT_RHO,
                  check_pure=False, rho_pure=DEFAULT_RHO_PURE,
                  rtol=DEFAULT_RTOL, maxit=DEFAULT_MAXIT,
+                 acondlim=DEFAULT_ACONDLIM, trancond=DEFAULT_TRANCOND,
+                 maxxnorm=DEFAULT_MAXXNORM,
                  log_kwargs=None):
         NewtonMR.__init__(self, f, alpha, beta, rho, check_pure, rho_pure,
-                          rtol=rtol, maxit=maxit, log_kwargs=log_kwargs)
+                          rtol=rtol, maxit=maxit, acondlim=acondlim, trancond=trancond,
+                          log_kwargs=log_kwargs)
         self.hvp = autograd.hessian_vector_product(self.f)
 
 
