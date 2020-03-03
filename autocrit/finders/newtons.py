@@ -221,7 +221,8 @@ class FastNewtonMR(NewtonMR):
                  maxxnorm=DEFAULT_MAXXNORM,
                  log_mrqlp=False, log_kwargs=None):
         NewtonMR.__init__(self, f, alpha, beta, rho, check_pure, rho_pure,
-                          rtol=rtol, maxit=maxit, acondlim=acondlim, trancond=trancond,
+                          rtol=rtol, maxit=maxit, acondlim=acondlim,
+                          maxxnorm=maxxnorm, trancond=trancond,
                           log_mrqlp=log_mrqlp, log_kwargs=log_kwargs)
         self.hvp = autograd.hessian_vector_product(self.f)
 
