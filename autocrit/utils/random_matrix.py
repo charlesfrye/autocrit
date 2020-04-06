@@ -35,13 +35,14 @@ class RandomMatrix(object):
     def __repr__(self):
         return self.M.__repr__()
 
-    def display_expected_cumulative_spectral_distribution(self, ax, precision=PRECISION):
+    def display_expected_cumulative_spectral_distribution(
+            self, ax, precision=PRECISION, **plot_kwargs):
         lams = self.generate_lams(self.max_lam + precision, precision)
 
         expected_csds = self.expected_cumulative_spectral_distribution(
             self.max_lam + precision, precision, accumulate=True)
 
-        ax.plot(lams[1:], expected_csds, linewidth=2)
+        ax.plot(lams[1:], expected_csds, **plot_kwargs)
 
         return ax
 
