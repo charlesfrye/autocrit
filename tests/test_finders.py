@@ -127,8 +127,8 @@ def test_GradientNormMinimizer():
 
     problem_str = "least squares"
     finder_kwargs = {"minimizer_str": "momentum",
-                     "minimizer_params": {"lr": 5e-3,
-                                          "momentum": 1 - 1e-10}}
+                     "minimizer_params": {"lr": 1e-2,
+                                          "momentum": 0.9}}
     num_iters = 1000
 
     random_least_squares_problem, random_init = \

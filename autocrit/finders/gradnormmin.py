@@ -44,7 +44,7 @@ class GradientNormMinimizer(Finder):
         self.update_logs({"theta": theta})
 
         for ii in range(num_iters):
-            theta_new = self.minimizer.update(theta)
+            theta_new = theta + self.minimizer.update(theta)
             self.update_logs({"theta": theta_new})
 
             if np.array_equal(theta, theta_new):
