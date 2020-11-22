@@ -7,3 +7,6 @@ To install, clone this repository, navigate to the directory it was cloned into,
 ```
 pip install -e autocrit
 ```
+
+For additional tools useful in the analysis of critical point-finding experiments,
+see the [`autocrit_tools` repo](https://github.com/charlesfrye/autocrit_tools).
